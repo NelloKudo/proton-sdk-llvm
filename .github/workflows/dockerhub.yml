@@ -1,0 +1,42 @@
+name: Push proton-sdk-llvm-mingw to DockerHub
+
+on:
+  push:
+    tags: 
+      - 'proton-sdk*'
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUBNAME }}
+          password: ${{ secrets.DOCKERHUBCI }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Proton SDK using Proton's Makefile
+        working-directory: ./Proton/docker
+        run: make proton-llvm
+
+      - name: Retag and push to Docker Hub
+        run: |
+          SRC_TAG="registry.gitlab.steamos.cloud/proton/sniper/sdk/llvm:3.0.20250826.159138-0-dev"
+
+          DST_USER="sherrydck"
+          DST_NAME="proton-sdk-llvm-mingw"
+          DST_TAG="${{ github.ref_name }}"
+
+          docker tag "$SRC_TAG" "$DST_USER/$DST_NAME:$DST_TAG"
+          docker tag "$SRC_TAG" "$DST_USER/$DST_NAME:latest"
+          docker push "$DST_USER/$DST_NAME:$DST_TAG"
+          docker push "$DST_USER/$DST_NAME:latest"
