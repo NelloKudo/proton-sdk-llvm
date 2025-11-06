@@ -1,0 +1,3 @@
+[submodule "Proton"]
+	path = Proton
+	url = https://github.com/ValveSoftware/Proton
