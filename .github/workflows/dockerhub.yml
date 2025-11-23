@@ -1,13 +1,13 @@
-name: Push proton-sdk-llvm-mingw to DockerHub
+name: Push proton-sdk-arm64 to DockerHub
 
 on:
   push:
     tags: 
-      - 'proton-sdk*'
+      - 'proton-sdk-arm64-*'
 
 jobs:
   docker:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     steps:
       - name: Checkout source
@@ -26,16 +26,14 @@ jobs:
       
       - name: Build Proton SDK using Proton's Makefile
         working-directory: ./Proton/docker
-        run: make proton-llvm
+        run: make BUILD_ARCH=aarch64 proton-llvm
 
       - name: Retag and push to Docker Hub
         run: |
-          SRC_TAG="registry.gitlab.steamos.cloud/proton/sniper/sdk/llvm:3.0.20250826.159138-0-dev"
-
+          SRC_TAG="registry.gitlab.steamos.cloud/proton/sniper/sdk/arm64/llvm:latest"
           DST_USER="sherrydck"
-          DST_NAME="proton-sdk-llvm-mingw"
+          DST_NAME="proton-sdk-arm64"
           DST_TAG="${{ github.ref_name }}"
-
           docker tag "$SRC_TAG" "$DST_USER/$DST_NAME:$DST_TAG"
           docker tag "$SRC_TAG" "$DST_USER/$DST_NAME:latest"
           docker push "$DST_USER/$DST_NAME:$DST_TAG"
